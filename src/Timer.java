@@ -1,15 +1,16 @@
 
 public class Timer extends Thread {
-	private static final LanderFrame frame = new LanderFrame();
+	private static LanderFrame frame = new LanderFrame();
+	public static boolean GAME_STATUS = false;
+
 	LanderCanvas myCanvas = new LanderCanvas();;
 
 	public void run() {
-		while (LanderCanvas.GAME_STATUS == false) {
+		while (!GAME_STATUS) {
 			try {
 				Thread.sleep(100);// 0.1sec delay
 				myCanvas.gravity();
 				frame.repaint();
-				// myCanvas.repaint();
 
 			}
 
@@ -17,12 +18,13 @@ public class Timer extends Thread {
 				System.out.println(e);
 			}
 		}
+
 	}
 
 	public static void main(String[] args) {
 		Timer timer = new Timer();
 		timer.start();
-		
+
 	}
 
 }

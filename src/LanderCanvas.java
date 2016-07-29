@@ -13,11 +13,12 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class LanderCanvas extends JPanel {
-	public static boolean GAME_STATUS = false;
 	public static double dropTime = 0.01;
 	Rectangle dr;
-	BufferedImage  offscreen;	public static int x = 0;
+	BufferedImage offscreen;
+	public static int x = 0;
 	public static int y = 0;
+	public static LanderFrame frame;
 
 	int[] groundXS = { 0, 30, 40, 100, 140, 160, 180, 200, 220, 230, 300, 310, 330, 350, 360, 400, 410, 435, 460, 465,
 			500, 545, 560, 575, 580, 600, 600, 0 };
@@ -28,22 +29,19 @@ public class LanderCanvas extends JPanel {
 	int[] landerYS = { 5, 0, 0, 5, 20, 20, 35, 35, 40, 40, 35, 35, 20, 20, 25, 25, 20, 20, 35, 35, 40, 40, 35, 35, 20,
 			20 };
 	private boolean screen;
+	public static int fuel = 100;
 	public static boolean showFire;
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		//this.g= g;
 		super.paintComponent(g);
 
 	}
-	
 
 	@Override
 	public Image createImage(int x, int y) {
-		// TODO Auto-generated method stub
-		return super.createImage(x,y);
+		return super.createImage(x, y);
 	}
-
 
 	@Override
 	public Dimension getPreferredSize() {
@@ -56,22 +54,29 @@ public class LanderCanvas extends JPanel {
 
 	}
 
+	/**
+	 * draw fire after lander
+	 */
 	public void fire() {
 		this.showFire = true;
 		dropTime = 0.01;
 		LanderCanvas.y = (int) ((LanderCanvas.y - 1) / (1 + dropTime));
 
 	}
-	
-	public void thrust(){
-		
-	}
-	public void bufferdraw(){
+
+	public void bufferdraw() {
 		screen = true;
-		  offscreen = (BufferedImage) createImage(600,600);
+		offscreen = (BufferedImage) createImage(600, 600);
 		Graphics offgc = offscreen.getGraphics();
 		offgc.setColor(Color.red);
 		offgc.fillRect(0, 0, 1000, 1000);
+	}
+
+	private void thrust(int fuel2, Graphics g) {
+		g.drawRect(450, 20, 100, 20);
+		g.drawString("Fuel", 420, 35);
+		g.setColor(Color.GREEN);
+		g.fillRect(450, 20, fuel2, 20);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -83,6 +88,8 @@ public class LanderCanvas extends JPanel {
 		// set a polygon ground and set with color
 		Polygon ground = new Polygon(groundXS, groundYS, groundYS.length);
 		g.fillPolygon(ground);
+		thrust(fuel, g);
+
 		// graphcis pixel changing
 		g.translate(x, y);
 		// set a polygong lander and set with color
@@ -92,46 +99,33 @@ public class LanderCanvas extends JPanel {
 		Rectangle dr = lander.getBoundingBox();
 		// renew the rectangle position
 		dr.translate(x, y);
-		//if (showFire) {
-			g.setColor(Color.white);
-			g.fillRoundRect((int)(dr.getMinX()),(int)( dr.getMaxY()), dr.width/2, dr.height/2, 30, 10);
-		//}
-		// give warning if collision happens
-		// System.out.println(dr.getMinX()+" "+dr.getMaxX()+" "+dr.getMinY()+"
-		// "+dr.getMaxY());
+		// if (showFire) {
+		// g.setColor(Color.white);
+		// g.fillRoundRect((int)(dr.getMinX()),(int)( dr.getMaxY()), dr.width/2,
+		// dr.height/2, 30, 10);
+		// }
 		if (ground.intersects(dr)) {
 			for (int i = 0; i < landerXS.length; i++) {
 				if (groundXS[i] <= dr.getMinX() && groundXS[i + 1] >= dr.getMaxX()) {
 					if (((dr.getMaxY()) >= groundYS[i]) && (Math.abs(groundYS[i] - groundYS[i + 1])) <= 10) {
 						// player win the game
-						GAME_STATUS = true;
-
-						int r = JOptionPane.showConfirmDialog(this, new JLabel("You Won the game!"), "Warning!",
-								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-						return;
+						frame.wonTheGame();
+						//return;
 					} else {
 						// lost the game
-						GAME_STATUS = true;
-
-						int r = JOptionPane.showConfirmDialog(this, new JLabel("You Lost the game!"), "Warning!",
-								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-						return;
-
+						frame.lostTheGame();
+						//return;
 					}
 				}
 
 			}
 			// lost the game
-			GAME_STATUS = true;
-
-			int r = JOptionPane.showConfirmDialog(this, new JLabel("You Lost the game!"), "Warning!",
-					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-
-			return;
+			frame.lostTheGame();
+			//return;
 		}
-		if(screen){
-		g.drawImage(offscreen,0,0,this);
-		}
+		// if(screen){
+		// g.drawImage(offscreen,0,0,this);
+		// }
 
 	}
 
